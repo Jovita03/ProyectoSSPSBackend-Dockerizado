@@ -20,8 +20,11 @@ app.get('/', (req, res) => {
     res.send('¡Servidor funcionando!');
 });
 
-app.get('/users', async (req, res) => {
-    const { email } = req.query; 
+app.get('/users/:email', async (req, res) => {
+    
+    const email = req.params.email; //changed the way we send the email from the frontend
+
+    
     if (!email) {
         return res.status(400).json({ message: 'El correo electrónico es requerido' });
     }
@@ -54,6 +57,7 @@ app.post('/register', async (req, res) => {
     }
 
     try {
+        
         const hashedPassword = await bcrypt.hash(password, 10);
         const { data, error } = await supabase
             .from('users')
@@ -69,6 +73,7 @@ app.post('/register', async (req, res) => {
         return res.status(500).json({ message: 'Error al registrar el usuario', error: error.message });
     }
 });
+
 
 app.post('/login', async (req, res) => {
     const { email, password } = req.body;
