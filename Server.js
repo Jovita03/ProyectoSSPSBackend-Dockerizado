@@ -133,7 +133,7 @@ app.post('/login', async (req, res) => {
 
 
 app.get('/protected', async (req, res) => {
-    const token = req.cookies.acces_token
+    const token = req.cookies.access_token
 
     if (!token) {
         return res.status(403).send('Acceso no autorizado')
@@ -165,6 +165,17 @@ app.get('/publication', async (req, res) => {
         return res.status(500).json({ message: 'Error al obtener publicaciones', error: error.message });
     }
 });
+
+app.get('/logout', (req, res)=>{
+    res.clearCookie('access_token',{
+        httpOnly: true,
+            secure: process.env.NODE_ENV === 'production', 
+            maxAge: 1000 * 60 * 60,
+            sameSite: 'strict' 
+    })
+    res.status(200).json({ message: "Logout exitoso" });
+
+})
 
 
 
