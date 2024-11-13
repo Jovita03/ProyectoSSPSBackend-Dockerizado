@@ -11,7 +11,11 @@ const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_ANO
 
 const app = express();
 
-app.use(cors());
+app.use(cors({
+    origin: 'http://localhost:5173', 
+    credentials: true 
+}));
+
 app.use(express.json());
 app.use(cookieParser())
 
@@ -99,20 +103,28 @@ app.post('/login', async (req, res) => {
 
         const token = jwt.sign({id:data.id, name:data.full_name, isAdmin: data.isAdmin} , process.env.SECRET_KEY, {
             expiresIn: '1h'
-        })
+        });
 
-        res.cookie('acces_token', token, {
-            maxAge: 1000 * 60 * 60, 
-            });
+        console.log(token);
+        
+
+        res.cookie('access_token', token, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === 'production', 
+            maxAge: 1000 * 60 * 60,
+            sameSite: 'strict' 
+        });
+
+        return res.status(200).json({
+            message: 'Inicio de sesión exitoso',
+            user: {
+            email: data.email,
+            full_name: data.full_name,
+            },
+            token
+        });
             
-            return res.status(200).json({
-                message: 'Inicio de sesión exitoso',
-                user: {
-                email: data.email,
-                full_name: data.full_name,
-                },
-                token
-            });
+                    
     } catch (error) {
         console.error("Error interno:", error);
         return res.status(500).json({ message: 'Error al iniciar sesión', error: error.message });
