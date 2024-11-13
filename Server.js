@@ -133,19 +133,27 @@ app.post('/login', async (req, res) => {
 
 
 app.get('/protected', async (req, res) => {
-    const token = req.cookies.access_token
+    const token = req.cookies.access_token;
+    console.log("esta es la cookie");
 
     if (!token) {
-        return res.status(403).send('Acceso no autorizado')
+        return res.status(403).json({ message: 'Acceso no autorizado' });
     }
 
-    try{
-        const data = jwt.verify(token, process.env.SECRET_KEY )
-        console.log(data)
-    }catch(error){
-        res.status(403).send('Acceso no autorizado')
+    try {
+        const data = jwt.verify(token, process.env.SECRET_KEY);
+        console.log(data.isAdmin);
+
+        // Enviamos un JSON con el mensaje de autorización y el estado de isAdmin
+        res.status(200).json({
+            message: 'Acceso autorizado',
+            isAdmin: data.isAdmin
+        });
+    } catch (error) {
+        res.status(403).json({ message: 'Acceso no autorizado' });
     }
-})
+});
+
 
 
 app.get('/publication', async (req, res) => {
