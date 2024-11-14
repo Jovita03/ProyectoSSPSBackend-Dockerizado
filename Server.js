@@ -27,7 +27,6 @@ app.get('/', (req, res) => {
 app.get('/users/:email', async (req, res) => {
     
     const email = req.params.email; //changed the way we send the email from the frontend
-
     
     if (!email) {
         return res.status(400).json({ message: 'El correo electrónico es requerido' });
@@ -134,7 +133,6 @@ app.post('/login', async (req, res) => {
 
 app.get('/protected', async (req, res) => {
     const token = req.cookies.access_token;
-    console.log("esta es la cookie");
 
     if (!token) {
         return res.status(403).json({ message: 'Acceso no autorizado' });
@@ -142,7 +140,6 @@ app.get('/protected', async (req, res) => {
 
     try {
         const data = jwt.verify(token, process.env.SECRET_KEY);
-        console.log(data.isAdmin);
         res.status(200).json({
             message: 'Acceso autorizado',
             isAdmin: data.isAdmin
