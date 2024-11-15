@@ -163,6 +163,33 @@ app.get('/publication', async (req, res) => {
     res.status(200).json(data); // Solo retornamos los datos sin el mensaje adicional
 });
 
+app.post('/postPublication', async (req, res) => {
+    const { newPostTitle, newPostContent, fullName } = req.body;
+
+    if (!newPostTitle || !newPostContent || !fullName) {
+        return res.status(400).json({ message: 'Todos los campos son necesarios' });
+    }
+
+    try {
+        const { data, error } = await supabase
+            .from('publication')
+            .insert({ title: newPostTitle, content: newPostContent, user: fullName });
+
+        if (error) {
+            console.error('Error al insertar la publicación:', error);
+            return res
+                .status(500)
+                .json({ message: 'Error al registrar la publicación', details: error.message });
+        }
+
+        return res.status(201).json({ message: 'Publicación registrada con éxito', data });
+    } catch (error) {
+        console.error('Error interno:', error);
+        return res
+            .status(500)
+            .json({ message: 'Error al registrar la publicación', details: error.message });
+    }
+});
 
 
 app.get('/logout', (req, res)=>{
