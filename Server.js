@@ -46,7 +46,7 @@ app.get('/users/:email', async (req, res) => {
             return res.status(404).json({ message: 'Usuario no encontrado' });
         }
     } catch (error) {
-        console.error("Error interno:", error);
+        console.error("Error interno:  ", error);
         return res.status(500).json({ message: 'Error al obtener datos de Supabase', error: error.message });
     }
 });
