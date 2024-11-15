@@ -152,22 +152,18 @@ app.get('/protected', async (req, res) => {
 
 
 app.get('/publication', async (req, res) => {
-    try {
-        const { data, error } = await supabase
-            .from('publication')
-            .select('*');
-        
-        if (error) {
-            console.error("Error al obtener publicaciones:", error);
-            return res.status(500).json({ message: 'Error al obtener publicaciones' });
-        }
+    const { data, error } = await supabase.from('publication').select('*');
 
-        return res.status(200).json({message: 'Publicaciones recuperadas con exito', publication: data});
-    } catch (error) {
-        console.error("Error interno:", error);
-        return res.status(500).json({ message: 'Error al obtener publicaciones', error: error.message });
+    if (error) {
+        console.error(error);
+        return res.status(500).json({ error: 'Error al obtener publicaciones' });
     }
+    console.log(data)
+
+    res.status(200).json(data); // Solo retornamos los datos sin el mensaje adicional
 });
+
+
 
 app.get('/logout', (req, res)=>{
     res.clearCookie('access_token',{
