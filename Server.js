@@ -216,6 +216,87 @@ app.post('/deletePublication', async (req, res) => {
 });
 
 
+app.post('/comments', async (req, res) => {
+    const { id } = req.body;
+
+    // Obtener los comentarios de la publicación
+    const { data, error } = await supabase
+        .from('comments')
+        .select('*')
+        .eq('id_Publication', id);
+
+    if (error) {
+        return res.status(500).json({ error: 'Error al obtener comentarios' });
+    }
+
+    // Iterar sobre los comentarios y obtener el full_name de cada usuario
+    const commentsWithUser = await Promise.all(data.map(async (comment) => {
+        // Obtener los datos del usuario basado en el id_user del comentario
+        const { data: userData, error: userError } = await supabase
+            .from('users')
+            .select('full_name')
+            .eq('id', comment.id_user);
+
+        if (userError) {
+            console.error('Error al obtener el full_name:', userError);
+            comment.full_name = null;
+        } else {
+            // Comprobar si se obtuvo al menos un usuario
+            if (userData && userData.length > 0) {
+                comment.full_name = userData[0].full_name;
+            } else {
+                comment.full_name = 'Usuario no encontrado'; // O algún valor por defecto
+            }
+        }
+
+        return comment;  // Retornamos el comentario con el full_name
+    }));
+
+    // Enviar los comentarios con el nombre de usuario
+    res.status(200).json(commentsWithUser);
+});
+
+app.post('/addComment', async (req, res) => {
+    const token = req.cookies.access_token;
+
+    if (!token) {
+        return res.status(403).json({ message: 'Acceso no autorizado' });
+    }
+
+    try {
+        const data = jwt.verify(token, process.env.SECRET_KEY);
+
+        const userId = data.id; 
+
+        console.log('User ID:', userId);
+
+        const { content, postId } = req.body;
+
+        const { error } = await supabase
+            .from('comments')
+            .insert([
+                {
+                    content,
+                    id_user: userId,  // Asociar el comentario con el 'id' del usuario
+                    id_Publication: postId,
+                    Date: new Date().toISOString(),  // Fecha del comentario
+                }
+            ]);
+
+        if (error) {
+            console.error('Error al agregar comentario:', error);
+            return res.status(500).json({ message: 'Error al agregar comentario' });
+        }
+
+        res.status(200).json({ message: 'Comentario agregado correctamente', userId });
+    } catch (error) {
+        console.error('Error al verificar el token:', error);
+        res.status(403).json({ message: 'Token inválido o expirado' });
+    }
+});
+
+
+
 app.get('/logout', (req, res)=>{
     res.clearCookie('access_token',{
         httpOnly: true,
@@ -226,6 +307,8 @@ app.get('/logout', (req, res)=>{
     res.status(200).json({ message: "Logout exitoso" });
 
 })
+
+
 
 
 
