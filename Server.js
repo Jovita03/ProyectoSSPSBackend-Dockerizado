@@ -192,6 +192,30 @@ app.post('/postPublication', async (req, res) => {
 });
 
 
+app.post('/deletePublication', async (req, res) => {
+    const id = req.body.id;
+
+    // Verifica que el ID esté presente
+    if (!id) {
+        return res.status(400).json({ error: 'ID is required' });
+    }
+
+    try {
+        const { error } = await supabase
+            .from('publication')
+            .delete()
+            .eq('id', id);
+        if (error) {
+            throw error;
+        }
+        res.status(200).json({ message: 'Publicacion eliminada exitosamente' });
+    } catch (error) {
+        console.error('Error al eliminar la publicacion:', error.message);
+        res.status(500).json({ error: 'Failed to delete publication' });
+    }
+});
+
+
 app.get('/logout', (req, res)=>{
     res.clearCookie('access_token',{
         httpOnly: true,
