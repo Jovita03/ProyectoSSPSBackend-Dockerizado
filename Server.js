@@ -50,7 +50,7 @@ app.get('/users/:email', async (req, res) => {
         return res.status(500).json({ message: 'Error al obtener datos de Supabase', error: error.message });
     }
 });
-
+   
 const bcrypt = require('bcrypt');
 
 app.post('/register', async (req, res) => {
