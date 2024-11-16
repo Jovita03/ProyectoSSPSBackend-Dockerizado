@@ -295,6 +295,25 @@ app.post('/addComment', async (req, res) => {
     }
 });
 
+app.post('/deleteComments', async(req,res)=>{
+    const id_Publication = req.body.id
+    console.log(id_Publication);
+
+    try {
+        const { error } = await supabase
+        .from('comments')
+        .delete()
+        .eq('id_Publication', id_Publication)
+        if (error) {
+            throw error;
+        }
+        res.status(200).json({ message: 'Comentarios eliminados exitosamente' });
+    } catch (error) {
+        console.error('Error al eliminar los comentarios:', error.message);
+        res.status(500).json({ error: 'Falla al eliminar los comentarios' });
+    }
+    
+})
 
 
 app.get('/logout', (req, res)=>{
@@ -308,7 +327,91 @@ app.get('/logout', (req, res)=>{
 
 })
 
+app.get('/type', async (req, res) => {
+    
+    let { data: type, error } = await supabase
+    .from('type')
+    .select('*')
 
+    if(error){
+        console.error(error);
+        return res.status(500).json({ error: 'Error al obtener tipos' });
+    }
+    console.log(type)
+
+    res.status(200).json(type); 
+})
+
+
+app.post('/addTopic', async (req, res) => {
+    const { titulo, descripcion, contenido, fecha, tipo } = req.body;
+
+    const { data, error } = await supabase
+        .from('topics')
+        .insert([
+            { 
+                Title: titulo, 
+                Description: descripcion, 
+                Content: contenido, 
+                Date: fecha, 
+                Id_type: tipo 
+            }
+        ])
+        .select();
+
+    if (error) {
+        console.error(error);
+        return res.status(500).json({ error: 'Error al agregar el tema' });
+    }
+
+    res.status(200).json(data);
+});
+
+app.get('/topics', async (req, res) => {
+    try {
+        // Realizamos una consulta con una unión entre 'topics' y 'type'
+        const { data: topics, error } = await supabase
+            .from('topics')
+            .select(`
+                id,
+                Title,
+                Description,
+                Content,
+                Date,
+                type:Id_type (name)  // Esto trae el nombre del tipo (en lugar del ID)
+            `);
+
+        if (error) {
+            console.error(error);
+            return res.status(500).json({ error: 'Error al obtener temas' });
+        }
+
+        // Enviar los temas con el nombre del tipo
+        res.status(200).json(topics);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: 'Error en el servidor' });
+    }
+});
+
+app.post('/deleteTopic', async (req, res) => {
+    const idDelete = req.body.id
+    console.log(idDelete);
+    try{
+        const { error } = await supabase
+        .from('topics')
+        .delete()
+        .eq('id', idDelete)
+        if (error) {
+            console.error(error);
+            return res.status(500).json({ error: 'Error al eliminar el tema' });
+        }
+        res.status(200).json({ message: 'Tema eliminado exitosamente' });
+    }catch(error){
+        console.error(error);
+        res.status(500).json({ error: 'Error en el servidor' });
+    }
+})
 
 
 
