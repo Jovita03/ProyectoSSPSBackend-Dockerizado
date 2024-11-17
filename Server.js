@@ -142,7 +142,8 @@ app.get('/protected', async (req, res) => {
         const data = jwt.verify(token, process.env.SECRET_KEY);
         res.status(200).json({
             message: 'Acceso autorizado',
-            isAdmin: data.isAdmin
+            isAdmin: data.isAdmin,
+            id: data.id
         });
     } catch (error) {
         res.status(403).json({ message: 'Acceso no autorizado' });
