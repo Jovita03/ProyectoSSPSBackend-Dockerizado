@@ -263,6 +263,71 @@ app.post('/createQuiz', async (req, res) => {
 });
 
 
+app.delete('/deleteQuiz/:id', async (req, res) => {
+    const id  = req.params.id; // Get the ID from the route parameters
+    console.log(id);
+    
+    try {
+        const { error } = await supabase
+            .from('Quiz')
+            .delete()
+            .eq('id', id);
+
+        if (error) {
+            console.error('Error deleting quiz:', error);
+            return res.status(500).json({ message: 'Error deleting quiz', error });
+        }
+
+        res.status(200).json({ message: 'Quiz deleted successfully' });
+    } catch (err) {
+        console.error('Unexpected error:', err);
+        res.status(500).json({ message: 'Unexpected error occurred', error: err.message });
+    }
+});
+
+
+app.get('/getQuizzes', async (req, res) => {
+    try {
+        const { data: quizzes, error } = await supabase
+            .from('Quiz')
+            .select(`
+                id,
+                Title,
+                Description,
+                Questions (
+                    id,
+                    Question,
+                    Id_Quiz,
+                    Options (
+                        Option,
+                        Is_Correct
+                    )
+                )
+            `);
+
+        if (error) {
+            console.error("Error fetching quizzes:", error);
+            return res.status(500).json({ message: "Error fetching quizzes", error });
+        }
+
+        // Transform the data to match the required format
+        const formattedQuizzes = quizzes.map((quiz) => ({
+            id: quiz.id,
+            titulo: quiz.Title,
+            descripcion: quiz.Description,
+            preguntas: quiz.Questions.map((question) => ({
+                texto: question.Question,
+                opciones: question.Options.map((option) => option.Option),
+                respuestaCorrecta: question.Options.findIndex((option) => option.Is_Correct),
+            })),
+        }));
+
+        res.status(200).json(formattedQuizzes);
+    } catch (err) {
+        console.error("Unexpected error:", err);
+        res.status(500).json({ message: "Unexpected error occurred", error: err.message });
+    }
+});
 
 
 app.post('/deletePublication', async (req, res) => {
