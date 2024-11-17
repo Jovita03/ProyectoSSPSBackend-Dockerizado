@@ -191,6 +191,79 @@ app.post('/postPublication', async (req, res) => {
     }
 });
 
+app.post('/createQuiz', async (req, res) => {
+    //const { Title, Description, preguntas } = req.body;
+    const Title = req.body.titulo;
+    const Description = req.body.descripcion;
+    const preguntas = req.body.preguntas;
+    console.log("Data received:");
+    console.log({ Title, Description, preguntas });
+
+    try {
+        // Insert into Quiz table
+        const { data: quizData, error: quizError } = await supabase
+            .from('Quiz')
+            .insert([{ Title, Description }])
+            .select('id');
+
+        if (quizError) {
+            console.error("Error inserting data into Quiz table:", quizError);
+            return res.status(500).json({ message: "Error inserting data into Quiz table", error: quizError });
+        }
+
+        const quizId = quizData[0]?.id;
+        console.log("Quiz inserted successfully with ID:", quizId);
+
+        // Insert questions into Questions table
+        const questionsData = preguntas.map((pregunta) => ({
+            Id_Quiz: quizId,
+            Question: pregunta.texto,
+        }));
+
+        const { data: questionsInserted, error: questionsError } = await supabase
+            .from('Questions')
+            .insert(questionsData)
+            .select('id');
+
+        if (questionsError) {
+            console.error("Error inserting data into Questions table:", questionsError);
+            return res.status(500).json({ message: "Error inserting questions", error: questionsError });
+        }
+
+        console.log("Questions inserted successfully:", questionsInserted);
+
+        // Insert options into Options table
+        const optionsData = [];
+        questionsInserted.forEach((question, index) => {
+            const pregunta = preguntas[index];
+            pregunta.opciones.forEach((opcion, opcionIndex) => {
+                optionsData.push({
+                    Id_Question: question.id,
+                    Option: opcion,
+                    Is_Correct: opcionIndex === pregunta.respuestaCorrecta,
+                });
+            });
+        });
+
+        const { error: optionsError } = await supabase
+            .from('Options')
+            .insert(optionsData);
+
+        if (optionsError) {
+            console.error("Error inserting data into Options table:", optionsError);
+            return res.status(500).json({ message: "Error inserting options", error: optionsError });
+        }
+
+        console.log("Options inserted successfully");
+        res.status(200).json({ message: "Quiz, questions, and options created successfully", quizId });
+    } catch (err) {
+        console.error("Unexpected error:", err);
+        res.status(500).json({ message: "Unexpected error occurred", error: err.message });
+    }
+});
+
+
+
 
 app.post('/deletePublication', async (req, res) => {
     const id = req.body.id;
