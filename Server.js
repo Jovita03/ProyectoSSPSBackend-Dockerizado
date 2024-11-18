@@ -88,7 +88,7 @@ app.post('/login', async (req, res) => {
     try {
         const { data, error } = await supabase
             .from('users')
-            .select('id, email, password, full_name, isAdmin')
+            .select('*')
             .eq('email', email)
             .single();
 
@@ -119,6 +119,7 @@ app.post('/login', async (req, res) => {
             user: {
             email: data.email,
             full_name: data.full_name,
+            is_block: data.is_block
             },
             token
         });
@@ -129,6 +130,75 @@ app.post('/login', async (req, res) => {
         return res.status(500).json({ message: 'Error al iniciar sesión', error: error.message });
     }
 });
+
+app.get('/listUsers', async (req, res) => {
+    try {
+        const { data: users, error } = await supabase
+            .from('users')
+            .select('id,full_name, email, is_block');
+
+        if (error) {
+            return res.status(400).json({
+                success: false,
+                message: 'Error al obtener la lista de usuarios.',
+                error: error.message
+            });
+        }
+
+        return res.status(200).json({
+            success: true,
+            message: 'Usuarios obtenidos exitosamente.',
+            users: users
+        });
+    } catch (err) {
+        return res.status(500).json({
+            success: false,
+            message: 'Error interno del servidor.',
+            error: err.message
+        });
+    }
+});
+
+// backend: actualización del estado de bloqueo
+app.post('/toggleBlock', async (req, res) => {
+    const { id, is_block } = req.body;
+
+    try {
+        const { data, error } = await supabase
+            .from('users')
+            .update({ is_block: is_block })
+            .eq('id', id)
+            .select(); // Devuelve los datos actualizados para validar
+
+        if (error) {
+            return res.status(400).json({
+                success: false,
+                message: 'Error al actualizar el estado del usuario.',
+                error: error.message,
+            });
+        }
+
+        if (!data || data.length === 0) {
+            return res.status(404).json({
+                success: false,
+                message: 'Usuario no encontrado.',
+            });
+        }
+
+        return res.status(200).json({
+            success: true,
+            message: 'Estado de usuario actualizado correctamente.',
+        });
+    } catch (err) {
+        return res.status(500).json({
+            success: false,
+            message: 'Error interno del servidor.',
+            error: err.message,
+        });
+    }
+});
+
+
 
 
 app.get('/protected', async (req, res) => {
@@ -524,8 +594,6 @@ app.get('/topics', async (req, res) => {
             console.error(error);
             return res.status(500).json({ error: 'Error al obtener temas' });
         }
-
-        // Enviar los temas con el nombre del tipo
         res.status(200).json(topics);
     } catch (error) {
         console.error(error);
