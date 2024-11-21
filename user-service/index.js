@@ -1,17 +1,17 @@
-// users-service/index.js
 const express = require('express');
+const userRoutes = require('./routes/userRoutes');
 const cors = require('cors');
-const userRoutes = require('./routes/userRoutes'); // Importamos las rutas de usuarios
 
 const app = express();
-const port = 3001;
+const PORT = process.env.PORT || 5002;
 
 app.use(express.json());
-app.use(cors());
+app.use(cors({
+  origin: 'http://localhost:5173',
+  credentials: true
+}));
+app.use('/users', userRoutes);
 
-// Usamos las rutas de usuarios para manejar las peticiones a /api/users
-app.use('/api/users', userRoutes);
-
-app.listen(port, () => {
-  console.log(`Microservicio de usuarios corriendo en el puerto ${port}`);
+app.listen(PORT, () => {
+  console.log(`Servicio de usuarios en ejecución en http://localhost:${PORT}`);
 });
