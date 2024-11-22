@@ -5,25 +5,29 @@ dotenv.config();
 
 const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_ANON_KEY);
 
-    const obtenerUsuarioPorEmail = async (email) => {
-        try {
-            const { data, error } = await supabase
-            .from('users')
-            .select('id, email, full_name, created_at, isAdmin, is_block')
-            .eq('email', email)
-            .single();
-
-            if (error) {
-            console.error("Error en la consulta:", error);
-            throw new Error('Error al obtener datos de Supabase');
-            }
-
-            return data;
-        } catch (error) {
-            console.error("Error interno:  ", error);
-            throw new Error('Error al obtener datos de Supabase');
-        }
-    };
+const obtenerUsuarioPorEmail = async (email) => {
+    try {
+      const { data, error } = await supabase
+        .from('users')
+        .select('id, email, full_name, created_at, isAdmin, is_block')
+        .eq('email', email);
+  
+      if (error) {
+        console.error("Error en la consulta:", error);
+        throw new Error('Error al obtener datos de Supabase');
+      }
+      if (data && data.length > 0) {
+        console.log(data[0]);
+        
+        return data[0]; 
+      } else {
+        return null; 
+      }
+    } catch (error) {
+      console.error("Error interno:  ", error);
+      throw new Error('Error al obtener datos de Supabase');
+    }
+  };
 
 // Listar usuarios
 const listarUsuarios = async () => {

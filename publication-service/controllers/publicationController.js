@@ -1,5 +1,5 @@
 const publicationService = require('../services/publicationService');
-
+const jwt = require('jsonwebtoken');
 const obtenerPublicaciones = async (req, res) => {
     try {
         const publicaciones = await publicationService.obtenerPublicaciones();
@@ -58,28 +58,23 @@ const obtenerComentarios = async (req, res) => {
 
 const agregarComentario = async (req, res) => {
     const token = req.cookies.access_token;
-
     if (!token) {
         return res.status(403).json({ message: 'Acceso no autorizado' });
     }
 
     try {
-        const response = await axios.get('http://localhost:5001/auth/protected', { 
-        headers: {
-            Authorization: `Bearer ${token}`
-        }
-    });
-
-    const userId = response.data.user.id; 
-
-    const { content, postId } = req.body;
-
-    await publicationService.agregarComentario(content, userId, postId);
+      // Decodificar el token JWT
+        const decoded = jwt.verify(token, process.env.JWT_SECRET); 
+    
+        const userId = decoded.id; 
+    
+        const { content, postId } = req.body;
+        await publicationService.agregarComentario(content, userId, postId);
         res.status(200).json({ message: 'Comentario agregado correctamente', userId });
-    } catch (error) {
+        } catch (error) {
         console.error('Error al agregar comentario:', error);
         return res.status(500).json({ message: 'Error al agregar comentario' });
-    }
+        }
     };
 
 const eliminarComentarios = async (req, res) => {

@@ -1,0 +1,35 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: publication-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: publication-service
+  template:
+    metadata:
+      labels:
+        app: publication-service
+    spec:
+      containers:
+      - name: publication-service
+        image: publication-service-image 
+        ports:
+        - containerPort: 5003
+        env:
+        - name: SUPABASE_URL
+          valueFrom:
+            secretKeyRef:
+              name: supabase-secrets
+              key: SUPABASE_URL
+        - name: SUPABASE_ANON_KEY
+          valueFrom:
+            secretKeyRef:
+              name: supabase-secrets
+              key: SUPABASE_ANON_KEY
+        - name: JWT_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: auth-service-secrets
+              key: JWT_SECRET

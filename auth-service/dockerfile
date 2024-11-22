@@ -4,11 +4,17 @@ WORKDIR /app
 
 COPY package*.json ./
 
+# Instalar las herramientas de compilación
+RUN apk add --no-cache --virtual .gyp python3 make g++
+
 RUN npm install --production
+RUN npm install bcrypt --build-from-source
 
 COPY . .
 
 ENV PORT=5001 
 EXPOSE $PORT
+
+RUN apk del .gyp
 
 CMD ["node", "index.js"]
