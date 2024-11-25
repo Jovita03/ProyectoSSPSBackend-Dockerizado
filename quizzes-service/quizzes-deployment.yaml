@@ -1,0 +1,35 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: quizzes-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: quizzes-service
+  template:
+    metadata:
+      labels:
+        app: quizzes-service
+    spec:
+      containers:
+      - name: quizzes-service
+        image: eljhovaflores/quizzes-service:latest
+        ports:
+        - containerPort: 5004
+        envFrom:
+        - secretRef:
+            name: global-secret
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: quizzes-service
+spec:
+  selector:
+    app: quizzes-service
+  ports:
+  - protocol: TCP
+    port: 5004
+    targetPort: 5004
+  type: LoadBalancer

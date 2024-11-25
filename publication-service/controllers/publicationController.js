@@ -1,5 +1,6 @@
 const publicationService = require('../services/publicationService');
 const jwt = require('jsonwebtoken');
+
 const obtenerPublicaciones = async (req, res) => {
     try {
         const publicaciones = await publicationService.obtenerPublicaciones();

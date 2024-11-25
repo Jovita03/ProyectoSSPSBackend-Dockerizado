@@ -8,11 +8,12 @@ const PORT = process.env.PORT || 5003;
 app.use(cookieParser());
 app.use(express.json());
 app.use(cors({
-    origin: 'http://frontend-service:5173',
-    credentials: true
+    origin: '*',
+    credentials: true,
+    methods: "*"
 }));
 app.use('/publicaciones', publicationRoutes);
 
 app.listen(PORT, () => {
-    console.log(`Servicio de publicaciones en ejecución en http://localhost:${PORT}`);
+    console.log(`Servicio de publicaciones en ejecución en este puerto ${PORT}`);
 });

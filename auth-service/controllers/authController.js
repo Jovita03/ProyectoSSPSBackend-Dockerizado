@@ -35,7 +35,7 @@ const registrarUsuario = async (req, res) => {
   try {
     const { user } = await authService.verifyUser(email, password);
 
-    const userResponse = await fetch(`http://user-service-container:5002/users/${email}`);
+    const userResponse = await fetch(`http://user-service/users/${email}`);
     const userData = await userResponse.json();
 
     if (!userResponse.ok) {

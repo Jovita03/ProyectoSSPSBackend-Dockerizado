@@ -1,1 +1,5 @@
-.env
+node_modules
+auth-deployment.yaml
+auth-ingress.yaml
+auth-secret.yaml
+package-lock.json

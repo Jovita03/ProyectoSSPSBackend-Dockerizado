@@ -1,0 +1,35 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: publication-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: publication-service
+  template:
+    metadata:
+      labels:
+        app: publication-service
+    spec:
+      containers:
+      - name: publication-service
+        image: eljhovaflores/publication-service:latest # Reemplaza con la etiqueta correcta
+        ports:
+        - containerPort: 5003
+        envFrom:
+        - secretRef:
+            name: global-secret
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: publication-service
+spec:
+  selector:
+    app: publication-service
+  ports:
+  - protocol: TCP
+    port: 5003
+    targetPort: 5003
+  type: LoadBalancer

@@ -1,0 +1,38 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: auth-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: auth-service
+  template:
+    metadata:
+      labels:
+        app: auth-service
+    spec:
+      containers:
+      - name: auth-service
+        image: eljhovaflores/auth-service:latest
+        ports:
+        - containerPort: 5001
+        envFrom:
+        - secretRef:
+            name: auth-secret
+        - secretRef:
+            name: global-secret
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: auth-service
+spec:
+  selector:
+    app: auth-service
+  ports:
+  - protocol: TCP
+    port: 5001
+    targetPort: 5001
+  type: LoadBalancer

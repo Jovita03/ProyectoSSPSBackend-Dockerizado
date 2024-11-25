@@ -13,8 +13,9 @@ app.use(express.json());
 app.use(cookieParser());
 app.use(cors(
     {
-        origin: 'http://frontend-service:5173',
-        credentials: true
+        origin: '*',
+        credentials: true,
+        methods: "*"
     }));
 
 app.use('/auth', authRoutes);

@@ -7,12 +7,14 @@ const PORT = process.env.PORT || 5005;
 
 app.use(express.json());
 app.use(cors({
-    origin: 'http://frontend-service:5173',
-    credentials: true
+    origin: '*',
+    credentials: true,
+    methods: "*"
 }));
 
 app.use('/temas', topicRoutes);
 
 app.listen(PORT, () => {
+    console.log("funcionando correctamente");
     
 });

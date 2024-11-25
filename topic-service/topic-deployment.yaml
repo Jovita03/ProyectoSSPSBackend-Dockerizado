@@ -1,0 +1,35 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: topic-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: topic-service
+  template:
+    metadata:
+      labels:
+        app: topic-service
+    spec:
+      containers:
+      - name: topic-service
+        image: eljhovaflores/topic-service:latest
+        ports:
+        - containerPort: 5005
+        envFrom:
+        - secretRef:
+            name: global-secret
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: topic-service
+spec:
+  selector:
+    app: topic-service
+  ports:
+  - protocol: TCP
+    port: 5005
+    targetPort: 5005
+  type: LoadBalancer
